@@ -9790,6 +9790,7 @@ GameObject:
   - component: {fileID: 1051310830}
   - component: {fileID: 1051310829}
   - component: {fileID: 1051310831}
+  - component: {fileID: 1051310832}
   m_Layer: 0
   m_Name: 360Video
   m_TagString: Untagged
@@ -9805,7 +9806,7 @@ VideoPlayer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1051310828}
   m_Enabled: 1
-  m_VideoClip: {fileID: 32900000, guid: 35ea92ee7b97d6c459fb4ef4498786ad, type: 3}
+  m_VideoClip: {fileID: 32900000, guid: 153544c5754df0a41b51509f56baeef0, type: 3}
   m_TargetCameraAlpha: 1
   m_TargetCamera3DLayout: 0
   m_TargetCamera: {fileID: 0}
@@ -9862,6 +9863,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isCounting: 0
   countingTime: 3
+--- !u!114 &1051310832
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1051310828}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0e70362bbb6f6b4dbcd121186ef4d46, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  videoPlayer: {fileID: 1051310829}
+  skyboxMaterial: {fileID: 2100000, guid: f74be84a2f3ad3844a100fb6090d4ede, type: 2}
 --- !u!1 &1052894922
 GameObject:
   m_ObjectHideFlags: 0
