@@ -1,6 +1,7 @@
 using System.IO;
 using UnityEngine;
 using UnityEngine.Video;
+using UnityEngine.Android;
 
 public class BugaVideoPlayer : MonoBehaviour
 {
@@ -12,6 +13,18 @@ public class BugaVideoPlayer : MonoBehaviour
 
     void Start()
     {
+        // Verifica e solicita permissões necessárias.
+        if (!Permission.HasUserAuthorizedPermission(Permission.ExternalStorageRead))
+        {
+            Permission.RequestUserPermission(Permission.ExternalStorageRead);
+        }
+
+        // Permissão adicional para gerenciamento de armazenamento (Android 12+).
+        if (!Permission.HasUserAuthorizedPermission("android.permission.MANAGE_EXTERNAL_STORAGE"))
+        {
+            Permission.RequestUserPermission("android.permission.MANAGE_EXTERNAL_STORAGE");
+        }
+
         // Define o caminho para a pasta de vídeos.
         videoFolderPath = Path.Combine(Application.persistentDataPath, "360Videos");
 
