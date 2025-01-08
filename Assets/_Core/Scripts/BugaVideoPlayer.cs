@@ -1,30 +1,36 @@
 using System.IO;
 using UnityEngine;
 using UnityEngine.Video;
-using UnityEngine.Android;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class BugaVideoPlayer : MonoBehaviour
 {
+    public enum VideoType
+    {
+        Mono360,
+        Stereo360,
+        Mono180,
+        Stereo180
+    }
+
+    [Header("Configurações de Vídeo")]
+    public VideoType videoType = VideoType.Mono360;
+
+    [Header("Materiais para Skybox")]
+    public Material material360Mono;
+    public Material material360Stereo;
+    public Material material180Mono;
+    public Material material180Stereo;
+
     public VideoPlayer videoPlayer; // Arraste seu VideoPlayer aqui.
-    public Material skyboxMaterial; // Material do Skybox.
 
     private RenderTexture renderTexture;
     private string videoFolderPath;
 
     void Start()
     {
-        // Verifica e solicita permissões necessárias.
-        if (!Permission.HasUserAuthorizedPermission(Permission.ExternalStorageRead))
-        {
-            Permission.RequestUserPermission(Permission.ExternalStorageRead);
-        }
-
-        // Permissão adicional para gerenciamento de armazenamento (Android 12+).
-        if (!Permission.HasUserAuthorizedPermission("android.permission.MANAGE_EXTERNAL_STORAGE"))
-        {
-            Permission.RequestUserPermission("android.permission.MANAGE_EXTERNAL_STORAGE");
-        }
-
         // Define o caminho para a pasta de vídeos.
         videoFolderPath = Path.Combine(Application.persistentDataPath, "360Videos");
 
@@ -41,18 +47,16 @@ public class BugaVideoPlayer : MonoBehaviour
 
     void LoadFirstVideoInFolder()
     {
-        // Obtém todos os arquivos de vídeo na pasta.
-        string[] videoFiles = Directory.GetFiles(videoFolderPath, "*.mp4"); // Filtra por .mp4
+        string[] videoFiles = Directory.GetFiles(videoFolderPath, "*.mp4");
 
         if (videoFiles.Length > 0)
         {
-            string videoPath = videoFiles[0]; // Seleciona o primeiro vídeo.
+            string videoPath = videoFiles[0];
             Debug.Log("Carregando vídeo: " + videoPath);
 
-            // Configura o VideoPlayer para reproduzir o vídeo.
             videoPlayer.url = videoPath;
-            videoPlayer.prepareCompleted += OnVideoPrepared; // Evento disparado quando o vídeo é preparado.
-            videoPlayer.Prepare(); // Prepara o vídeo.
+            videoPlayer.prepareCompleted += OnVideoPrepared;
+            videoPlayer.Prepare();
         }
         else
         {
@@ -62,33 +66,50 @@ public class BugaVideoPlayer : MonoBehaviour
 
     private void OnVideoPrepared(VideoPlayer vp)
     {
-        int videoWidth = (int)vp.texture.width;  // Obtém a largura do vídeo.
-        int videoHeight = (int)vp.texture.height; // Obtém a altura do vídeo.
+        int videoWidth = (int)vp.texture.width;
+        int videoHeight = (int)vp.texture.height;
 
-        // Cria uma nova RenderTexture com a resolução do vídeo.
         renderTexture = new RenderTexture(videoWidth, videoHeight, 0);
         renderTexture.Create();
 
-        // Configura o VideoPlayer para renderizar na RenderTexture.
         videoPlayer.targetTexture = renderTexture;
 
-        // Atribui a RenderTexture ao material do Skybox.
-        if (skyboxMaterial != null)
+        Material selectedMaterial = GetSkyboxMaterial();
+        if (selectedMaterial != null)
         {
-            skyboxMaterial.SetTexture("_MainTex", renderTexture);
+            selectedMaterial.SetTexture("_MainTex", renderTexture);
+            RenderSettings.skybox = selectedMaterial;
+            Debug.Log("Skybox atualizado com o material: " + selectedMaterial.name);
 
-            // Aplica o Skybox Material ao RenderSettings globalmente.
-            RenderSettings.skybox = skyboxMaterial;
-            Debug.Log("Skybox atualizado com o material.");
+#if UNITY_EDITOR
+            // Força o Editor a atualizar o Skybox no Lighting
+            DynamicGI.UpdateEnvironment();
+            EditorUtility.SetDirty(RenderSettings.skybox);
+#endif
         }
 
-        // Inicia o vídeo.
         videoPlayer.Play();
+    }
+
+    private Material GetSkyboxMaterial()
+    {
+        switch (videoType)
+        {
+            case VideoType.Mono360:
+                return material360Mono;
+            case VideoType.Stereo360:
+                return material360Stereo;
+            case VideoType.Mono180:
+                return material180Mono;
+            case VideoType.Stereo180:
+                return material180Stereo;
+            default:
+                return null;
+        }
     }
 
     void OnDestroy()
     {
-        // Libera a RenderTexture quando não for mais necessária.
         if (renderTexture != null)
         {
             renderTexture.Release();
