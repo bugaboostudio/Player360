@@ -1,5 +1,9 @@
 # Player360 — Buga Player 360
 
+[![CI](https://github.com/bugaboostudio/Player360/actions/workflows/ci.yml/badge.svg)](https://github.com/bugaboostudio/Player360/actions/workflows/ci.yml)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Unity](https://img.shields.io/badge/Unity-6000.0.32f1-black.svg?logo=unity)](https://unity.com)
+
 Player de vídeos imersivos **360° e 180° (mono e estéreo)** desenvolvido em Unity pela **Bugaboo Studio**, com foco em headsets **Meta Quest**. O aplicativo carrega automaticamente vídeos armazenados no dispositivo e os exibe como skybox imersivo, sem necessidade de interação do usuário.
 
 ## Visão geral
@@ -197,6 +201,16 @@ Os testes ficam em `Assets/Tests/EditMode` (assembly `EditModeTests`) e rodam no
 ## Utilitário de editor
 
 O menu **Assets > Create > Directory Structure** cria a estrutura padrão de pastas do projeto dentro de `Assets/_Core` (Scenes, Scripts, Materials, Prefabs, etc.).
+
+## Contribuindo
+
+Contribuições são bem-vindas! Leia o [CONTRIBUTING.md](CONTRIBUTING.md) para saber como preparar o ambiente, rodar os testes e abrir pull requests. Ao participar, você concorda com o nosso [Código de Conduta](CODE_OF_CONDUCT.md). Para reportar vulnerabilidades, veja a [política de segurança](SECURITY.md).
+
+## Licença
+
+Este projeto é licenciado sob a [Licença Apache 2.0](LICENSE) — veja também o arquivo [NOTICE](NOTICE).
+
+> **Marca:** a licença cobre o código-fonte e os assets deste repositório, mas **não** concede direitos sobre o nome e a marca "Bugaboo Studio", que permanecem propriedade da Bugaboo Studio.
 
 ## Créditos
 
