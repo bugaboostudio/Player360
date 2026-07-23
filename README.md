@@ -64,27 +64,39 @@ Escuta os eventos `HMDMounted`/`HMDUnmounted` do `OVRManager`. Se o usuário fic
 
 ## Como usar
 
-### 1. Configurar a cena
+**Passo 1:** Instale o app no Oculus (Meta Quest).
+
+**Passo 2:** Abra o app uma vez, para ele criar uma pasta chamada `360Videos`.
+
+**Passo 3:** Coloque o vídeo 360 Mono na pasta:
+
+```
+/sdcard/Android/data/com.BugabooStudio.BugaPlayer360Mono/files/360Videos
+```
+
+Você pode copiar o vídeo via cabo USB (explorador de arquivos ou ADB):
+
+```bash
+adb push meu_video.mp4 /sdcard/Android/data/com.BugabooStudio.BugaPlayer360Mono/files/360Videos/
+```
+
+> O player reproduz o **primeiro** arquivo `.mp4` encontrado na pasta. Ao abrir o app novamente, o vídeo será exibido automaticamente.
+>
+> **Observação:** o caminho da pasta varia conforme o identificador do build (ex.: `com.BugabooStudio.BugaPlayer180Stereo` para a variante 180 Estéreo).
+
+### Para desenvolvedores
+
+#### Configurar a cena
 
 1. Abra a cena `Assets/_Core/Scenes/360Play.unity`.
 2. No componente `BugaVideoPlayer`, selecione o **tipo de vídeo** (`Mono360`, `Stereo360`, `Mono180` ou `Stereo180`).
 3. Confirme que os quatro materiais de skybox e o `VideoPlayer` estão atribuídos no Inspector.
 
-### 2. Build para o Quest
+#### Build para o Quest
 
 1. Em **File > Build Settings**, selecione a plataforma **Android**.
 2. Certifique-se de que o **Oculus** está habilitado em **Project Settings > XR Plug-in Management**.
 3. Gere o APK e instale no headset (via cabo USB com ADB, ou Meta Quest Developer Hub).
-
-### 3. Enviar o vídeo para o dispositivo
-
-Copie o vídeo `.mp4` para a pasta de dados do aplicativo no headset:
-
-```bash
-adb push meu_video.mp4 /sdcard/Android/data/com.BugabooStudio.BugaPlayer180Stereo/files/360Videos/
-```
-
-> A pasta `360Videos` é criada automaticamente na primeira execução do aplicativo. O player reproduz o **primeiro** `.mp4` encontrado nela.
 
 ### Formatos de vídeo suportados
 
