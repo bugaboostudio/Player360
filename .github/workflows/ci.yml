@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, claude/gameci-github-cicd-6d9ozb] # TEMPORÁRIO: validar correção do CI neste branch; remover antes do merge
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch: {}
