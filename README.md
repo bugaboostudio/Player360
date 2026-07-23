@@ -4,7 +4,7 @@
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Unity](https://img.shields.io/badge/Unity-6000.0.32f1-black.svg?logo=unity)](https://unity.com)
 
-Player de vídeos imersivos **360° e 180° (mono e estéreo)** desenvolvido em Unity, com foco em headsets **Meta Quest**. Criado originalmente pela **[Bugaboo Studio](https://bugaboostudio.com)** e mantido pela **comunidade XRBR**. O aplicativo carrega automaticamente vídeos armazenados no dispositivo e os exibe como skybox imersivo, sem necessidade de interação do usuário.
+Player de vídeos imersivos **360° e 180° (mono e estéreo)** desenvolvido em Unity, com foco em headsets **Meta Quest**. Criado originalmente pela **[Bugaboo Studio](https://bugaboostudio.com)** e mantido pela **[XRBR](https://xrbr.com.br)** — Associação Brasileira de Realidade Estendida. O aplicativo carrega automaticamente vídeos armazenados no dispositivo e os exibe como skybox imersivo, sem necessidade de interação do usuário.
 
 ## Visão geral
 
@@ -216,4 +216,4 @@ Este projeto é licenciado sob a [Licença Apache 2.0](LICENSE) — veja também
 
 Criado originalmente por [Bugaboo Studio](https://bugaboostudio.com) — especialistas em VR, RA e 3D em tempo real.
 
-Mantido pela **comunidade XRBR**, a comunidade brasileira de realidade estendida (XR).
+Mantido pela [XRBR — Associação Brasileira de Realidade Estendida](https://xrbr.com.br), associação setorial sem fins lucrativos que reúne empresas e profissionais de XR no Brasil.

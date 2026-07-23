@@ -15,7 +15,7 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 ### Alterado
 
 - Assets de identidade visual renomeados (`AppIcon.jpg`, `SplashLogo.png`)
-- Créditos atualizados: projeto criado pela Bugaboo Studio e mantido pela comunidade XRBR
+- Créditos atualizados: projeto criado pela Bugaboo Studio e mantido pela XRBR — Associação Brasileira de Realidade Estendida
 
 ## [1.0.0] — histórico
 
