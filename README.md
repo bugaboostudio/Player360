@@ -156,6 +156,44 @@ adb push meu_video.mp4 /sdcard/Android/data/com.BugabooStudio.BugaPlayer360Mono/
 | 180° Mono | Equiretangular 180° |
 | 180° Estéreo | Equiretangular 180°, lado a lado (side-by-side) |
 
+## CI/CD (GameCI + GitHub Actions)
+
+O projeto usa [GameCI](https://game.ci/) para testes e builds automatizados no GitHub Actions. Os workflows ficam em `.github/workflows/`:
+
+| Workflow | Gatilho | O que faz |
+|---|---|---|
+| `ci.yml` | Push/PR na `main` (ou manual) | Roda os testes EditMode e, se passarem, gera o APK Android e publica como artefato (retenção de 14 dias) |
+| `release.yml` | Push de tag `v*` (ex.: `v1.2.0`) | Gera o APK com a versão da tag e cria uma **GitHub Release** com o APK anexado e release notes automáticas |
+| `activation.yml` | Manual (aba Actions) | Gera o arquivo `.alf` para ativar a licença Unity no CI (usado uma única vez) |
+
+### Configuração inicial (uma vez)
+
+O CI precisa de uma licença Unity ativada. Para **licença Personal**:
+
+1. Na aba **Actions**, rode o workflow **"Acquire activation file"** e baixe o artefato `.alf`.
+2. Acesse [license.unity3d.com/manual](https://license.unity3d.com/manual), envie o `.alf` e baixe o `.ulf`.
+3. Em **Settings > Secrets and variables > Actions**, crie os secrets:
+   - `UNITY_LICENSE` — conteúdo completo do arquivo `.ulf`
+   - `UNITY_EMAIL` — e-mail da conta Unity
+   - `UNITY_PASSWORD` — senha da conta Unity
+
+Para **licença Pro/Plus**, pule o workflow de ativação e configure `UNITY_SERIAL`, `UNITY_EMAIL` e `UNITY_PASSWORD` (ajustando os workflows para passar `UNITY_SERIAL` no lugar de `UNITY_LICENSE`).
+
+### Publicar uma versão
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+O workflow de release gera o APK (`BugaPlayer360-v1.0.0.apk`) e cria a release automaticamente.
+
+### Testes
+
+Os testes ficam em `Assets/Tests/EditMode` (assembly `EditModeTests`) e rodam no CI e localmente via **Window > General > Test Runner**. Os testes de fumaça atuais validam a configuração mínima de build (cena no Build Settings, identificador Android e Product Name). Novos testes EditMode devem ser adicionados nessa pasta.
+
+> **Nota:** testes PlayMode não rodam no CI por enquanto — o Meta XR SDK não inicializa em modo headless. O build Android usa IL2CPP + ARM64, conforme exigido pela Meta Store.
+
 ## Utilitário de editor
 
 O menu **Assets > Create > Directory Structure** cria a estrutura padrão de pastas do projeto dentro de `Assets/_Core` (Scenes, Scripts, Materials, Prefabs, etc.).

@@ -1,0 +1,59 @@
+name: Release
+
+# Dispara ao criar uma tag de versão, ex.: git tag v1.2.0 && git push origin v1.2.0
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write # necessário para criar a GitHub Release
+
+jobs:
+  build-and-release:
+    name: Build e Release (Android) 🚀
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Liberar espaço em disco
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: true
+          android: false
+          swap-storage: false
+
+      - name: Cache da Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-Android-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-Android-
+            Library-
+
+      - name: Build do projeto
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: Android
+          androidExportType: androidPackage
+          versioning: Tag # usa a versão da tag (v1.2.0 -> 1.2.0) no APK
+          buildName: BugaPlayer360
+
+      - name: Renomear APK com a versão
+        run: |
+          sudo mv "build/Android/BugaPlayer360.apk" "build/Android/BugaPlayer360-${GITHUB_REF_NAME}.apk"
+
+      - name: Criar GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/Android/BugaPlayer360-${{ github.ref_name }}.apk
+          generate_release_notes: true
