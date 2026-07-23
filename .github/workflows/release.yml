@@ -47,6 +47,7 @@ jobs:
           androidExportType: androidPackage
           versioning: Tag # usa a versão da tag (v1.2.0 -> 1.2.0) no APK
           buildName: BugaPlayer360
+          customParameters: -accept-apiupdate
 
       - name: Renomear APK com a versão
         run: |
