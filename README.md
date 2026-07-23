@@ -193,6 +193,8 @@ O workflow de release gera o APK (`BugaPlayer360-v1.0.0.apk`) e cria a release a
 Os testes ficam em `Assets/Tests/EditMode` (assembly `EditModeTests`) e rodam no CI e localmente via **Window > General > Test Runner**. Os testes de fumaça atuais validam a configuração mínima de build (cena no Build Settings, identificador Android e Product Name). Novos testes EditMode devem ser adicionados nessa pasta.
 
 > **Nota:** testes PlayMode não rodam no CI por enquanto — o Meta XR SDK não inicializa em modo headless. O build Android usa IL2CPP + ARM64, conforme exigido pela Meta Store.
+>
+> **Importante:** o Meta XR SDK não compila para o alvo Linux (erro `Unsupported platform` no MRUK). Por isso, tanto os testes quanto o build rodam sempre com `-buildTarget Android` na imagem GameCI com módulo Android — não remova esses parâmetros dos workflows.
 
 ## Utilitário de editor
 

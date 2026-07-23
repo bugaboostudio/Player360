@@ -30,12 +30,19 @@ jobs:
         uses: actions/cache@v4
         with:
           path: Library
-          key: Library-test-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          key: Library-test-android-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
-            Library-test-
-            Library-
+            Library-test-android-
+            Library-Android-
 
       # PlayMode fica de fora por enquanto: o Meta XR SDK não roda bem em batchmode headless.
+      #
+      # O Meta XR SDK não suporta o editor Linux como plataforma alvo: sem
+      # -buildTarget Android, o MRUK falha com "#error Unsupported platform".
+      # Por isso os testes rodam na imagem com módulo Android e com o alvo
+      # Android ativo (UNITY_ANDROID definido), igual ao job de build.
+      # -accept-apiupdate deixa o API Updater corrigir APIs renomeadas no
+      # Unity 6 (ex.: PhysicMaterial -> PhysicsMaterial) em batchmode.
       - name: Rodar testes
         uses: game-ci/unity-test-runner@v4
         env:
@@ -44,6 +51,8 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           testMode: EditMode
+          customImage: unityci/editor:ubuntu-6000.0.32f1-android-3
+          customParameters: -buildTarget Android -accept-apiupdate
           checkName: Resultados dos testes (EditMode)
           githubToken: ${{ secrets.GITHUB_TOKEN }}
 
@@ -98,6 +107,7 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           androidExportType: androidPackage
           versioning: Semantic
+          customParameters: -accept-apiupdate
 
       - name: Publicar APK
         uses: actions/upload-artifact@v4
