@@ -10,12 +10,17 @@ O projeto funciona como um player "kiosk": ao iniciar, ele procura o primeiro v�
 
 - **Suporte a 4 formatos de vídeo imersivo:**
   - 360° Mono
-  - 360° Estéreo
+  - 360° Estéreo (over-under)
   - 180° Mono
-  - 180° Estéreo
-- **Carregamento automático** do primeiro vídeo `.mp4` encontrado na pasta local do dispositivo (`persistentDataPath/360Videos`).
-- **Renderização via skybox**: o vídeo é projetado em uma `RenderTexture` aplicada ao material de skybox correspondente ao formato escolhido.
-- **Reinício automático por HMD**: ao tirar o headset por mais de 3 segundos e recolocá-lo, a experiência reinicia do zero (recarrega a cena inicial).
+  - 180° Estéreo (side-by-side)
+- **Detecção automática do formato pelo nome do arquivo** (sufixos `360M`, `360S`, `180M`, `180S`) — um único APK atende todos os formatos.
+- **Playlist com loop**: reproduz todos os vídeos da pasta em ordem alfabética; com um vídeo só, faz loop contínuo.
+- **Renderização via skybox** com o shader nativo `Skybox/Panoramic`, configurado em runtime.
+- **Fade de entrada/saída** (imagem e áudio) no início, no fim e na troca de vídeos.
+- **Reinício automático por HMD**: ao tirar o headset por mais de 3 segundos e recolocá-lo, a experiência reinicia do zero e **reescaneia a pasta** — dá para trocar o vídeo via USB sem fechar o app.
+- **Configuração por `config.json`** na própria pasta de vídeos (volume, loop, fade, formato) — sem rebuild.
+- **Tela de aviso** quando não há vídeo na pasta ou o arquivo não pode ser reproduzido.
+- **Log de uso** em `usage_log.txt` na pasta de vídeos: sessões (colocar/tirar o headset), duração, vídeos carregados e erros.
 
 ## Requisitos
 
@@ -38,8 +43,11 @@ Assets/
 │   ├── Scenes/
 │   │   └── 360Play.unity          # Cena principal do player
 │   ├── Scripts/
-│   │   ├── BugaVideoPlayer.cs     # Carregamento e reprodução do vídeo no skybox
-│   │   └── HMDController.cs       # Reinício da experiência ao recolocar o headset
+│   │   ├── BugaVideoPlayer.cs     # Playlist, detecção de formato, skybox e fades
+│   │   ├── HMDController.cs       # Reinício/rescan ao recolocar o headset + log de sessão
+│   │   ├── PlayerConfig.cs        # Leitura/criação do config.json da pasta de vídeos
+│   │   ├── UsageLogger.cs         # Log de uso em usage_log.txt
+│   │   └── FallbackMessage.cs     # Mensagem de aviso criada em runtime
 │   ├── Materials/                 # Materiais de skybox (360/180, mono/estéreo)
 │   ├── Editor/
 │   │   └── CreateDirectoryStructure.cs  # Utilitário para criar a estrutura de pastas
@@ -54,13 +62,54 @@ Assets/
 
 ### `BugaVideoPlayer.cs`
 
-1. No `Start()`, cria (se necessário) a pasta `Application.persistentDataPath/360Videos` no dispositivo.
-2. Busca o primeiro arquivo `.mp4` na pasta e o prepara no `VideoPlayer`.
-3. Quando o vídeo está pronto, cria uma `RenderTexture` na resolução do vídeo, aplica ao material de skybox correspondente ao `VideoType` selecionado no Inspector e inicia a reprodução.
+1. No `Start()`, cria (se necessário) a pasta `Application.persistentDataPath/360Videos` no dispositivo, carrega o `config.json` (criando um modelo se não existir) e inicializa o log de uso.
+2. Escaneia a pasta e monta a **playlist** com todos os vídeos suportados (`.mp4`, `.m4v`, `.webm`, `.mkv`), em ordem alfabética.
+3. Para cada vídeo, detecta o formato (config &gt; nome do arquivo &gt; padrão do Inspector) e configura o skybox `Skybox/Panoramic` em runtime (`_ImageType`, `_Layout`).
+4. Quando o vídeo está pronto, cria/reaproveita uma `RenderTexture` na resolução do vídeo, aplica ao skybox e inicia a reprodução com **fade de entrada**. Na troca de vídeos há fade de saída/entrada; erros de reprodução pulam para o próximo arquivo.
+5. Sem vídeo na pasta (ou se todos falharem), exibe uma **mensagem de aviso** no mundo com o caminho da pasta.
 
 ### `HMDController.cs`
 
-Escuta os eventos `HMDMounted`/`HMDUnmounted` do `OVRManager`. Se o usuário ficar **3 segundos ou mais** sem o headset, a cena inicial é recarregada ao recolocá-lo — garantindo que o próximo usuário sempre comece do início.
+Escuta os eventos `HMDMounted`/`HMDUnmounted` do `OVRManager`. Se o usuário ficar **3 segundos ou mais** sem o headset (configurável via `restartSeconds` do `config.json`), ao recolocá-lo o player **reescaneia a pasta e reinicia do primeiro vídeo** — o próximo usuário sempre começa do início, e vídeos trocados via USB entram sem fechar o app. Cada sessão (colocar/tirar o headset) é registrada no `usage_log.txt` com duração.
+
+### Convenção de nomes dos arquivos
+
+O formato de projeção é detectado pelo nome do arquivo (sem diferenciar maiúsculas):
+
+| Sufixo no nome | Formato |
+|---|---|
+| `360M` ou apenas `360` | 360° Mono |
+| `360S` | 360° Estéreo (over-under) |
+| `180M` ou apenas `180` | 180° Mono |
+| `180S` | 180° Estéreo (side-by-side) |
+
+Exemplos: `tour_virtual_360M.mp4`, `showroom_180S.mp4`. Sem sufixo, vale o `videoType` do `config.json` ou o padrão configurado no Inspector.
+
+### Configuração via `config.json`
+
+Na primeira execução, o app cria um `config.json` dentro da pasta `360Videos`. Edite-o pelo mesmo USB usado para trocar os vídeos — nenhum rebuild é necessário:
+
+```json
+{
+    "volume": 1.0,
+    "loop": true,
+    "restartSeconds": 3.0,
+    "fadeSeconds": 0.5,
+    "videoType": ""
+}
+```
+
+| Campo | Descrição |
+|---|---|
+| `volume` | Volume do áudio (0 a 1) |
+| `loop` | Repete o vídeo único / recomeça a playlist ao terminar |
+| `restartSeconds` | Segundos sem o headset para reiniciar ao recolocar |
+| `fadeSeconds` | Duração do fade de entrada/saída |
+| `videoType` | Força o formato (`Mono360`, `Stereo360`, `Mono180`, `Stereo180`); vazio = automático |
+
+### Log de uso
+
+O arquivo `usage_log.txt` (na pasta `360Videos`) registra em cada linha `data hora;evento;detalhes`: início do app, vídeos carregados/reproduzidos, início e fim de sessão com duração (`session_start` / `session_end;duration=...`), pasta vazia e erros. Útil para relatar ao cliente quantas pessoas usaram a experiência num evento.
 
 ## Como usar
 
@@ -80,7 +129,7 @@ Você pode copiar o vídeo via cabo USB (explorador de arquivos ou ADB):
 adb push meu_video.mp4 /sdcard/Android/data/com.BugabooStudio.BugaPlayer360Mono/files/360Videos/
 ```
 
-> O player reproduz o **primeiro** arquivo `.mp4` encontrado na pasta. Ao abrir o app novamente, o vídeo será exibido automaticamente.
+> O player reproduz **todos os vídeos da pasta em ordem alfabética** (playlist). Com um único arquivo, ele fica em loop. Para trocar o vídeo com o app aberto, basta substituir o arquivo e tirar/recolocar o headset — a pasta é reescaneada automaticamente.
 >
 > **Observação:** o caminho da pasta varia conforme o identificador do build (ex.: `com.BugabooStudio.BugaPlayer180Stereo` para a variante 180 Estéreo).
 
