@@ -26,6 +26,15 @@ jobs:
         with:
           lfs: true
 
+      # A imagem do editor com módulo Android é grande e não cabe no disco
+      # livre do runner padrão sem esta limpeza
+      - name: Liberar espaço em disco
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: true
+          android: false
+          swap-storage: false
+
       - name: Cache da Library
         uses: actions/cache@v4
         with:
