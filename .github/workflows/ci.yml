@@ -80,6 +80,8 @@ jobs:
     # O build completo (IL2CPP) é caro; em PRs basta o job de testes, que já
     # compila todos os scripts. O build roda no push para a main e no release.
     if: github.event_name != 'pull_request'
+    permissions:
+      contents: write # necessário para criar a tag e a GitHub Release
     strategy:
       fail-fast: false
       matrix:
@@ -109,6 +111,21 @@ jobs:
             Library-${{ matrix.targetPlatform }}-
             Library-
 
+      # A cada deploy na main é criado um novo release: a versão parte da
+      # última tag v* e incrementa o patch (sem tag anterior, começa em 1.0.0).
+      # Para soltar uma minor/major, crie a tag manualmente (release.yml).
+      - name: Calcular próxima versão
+        id: version
+        run: |
+          latest=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || true)
+          if [ -z "$latest" ]; then
+            version=1.0.0
+          else
+            version=$(echo "${latest#v}" | awk -F. '{printf "%d.%d.%d", $1, $2, $3 + 1}')
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Última tag: ${latest:-nenhuma} -> próxima versão: $version"
+
       - name: Build do projeto
         uses: game-ci/unity-builder@v4
         env:
@@ -118,8 +135,14 @@ jobs:
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
           androidExportType: androidPackage
-          versioning: Semantic
+          versioning: Custom
+          version: ${{ steps.version.outputs.version }}
+          buildName: BugaPlayer360
           customParameters: -accept-apiupdate
+
+      - name: Renomear APK com a versão
+        if: github.ref == 'refs/heads/main'
+        run: sudo mv "build/Android/BugaPlayer360.apk" "build/Android/BugaPlayer360-v${{ steps.version.outputs.version }}.apk"
 
       - name: Publicar APK
         uses: actions/upload-artifact@v4
@@ -127,3 +150,13 @@ jobs:
           name: BugaPlayer360-${{ matrix.targetPlatform }}
           path: build/${{ matrix.targetPlatform }}
           retention-days: 14
+
+      # A tag é criada pela própria action ao publicar o release; como usa o
+      # GITHUB_TOKEN, ela não redispara o release.yml (sem build duplicado)
+      - name: Criar GitHub Release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          files: build/Android/BugaPlayer360-v${{ steps.version.outputs.version }}.apk
+          generate_release_notes: true

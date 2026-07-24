@@ -166,8 +166,8 @@ O projeto usa [GameCI](https://game.ci/) para testes e builds automatizados no G
 
 | Workflow | Gatilho | O que faz |
 |---|---|---|
-| `ci.yml` | Push/PR na `main` (ou manual) | Roda os testes EditMode e, se passarem, gera o APK Android e publica como artefato (retenção de 14 dias) |
-| `release.yml` | Push de tag `v*` (ex.: `v1.2.0`) | Gera o APK com a versão da tag e cria uma **GitHub Release** com o APK anexado e release notes automáticas |
+| `ci.yml` | Push/PR na `main` (ou manual) | Roda os testes EditMode e, se passarem, gera o APK Android e publica como artefato. Em push na `main`, também cria a tag `vX.Y.Z` (patch incrementado) e publica uma **GitHub Release** com o APK anexado |
+| `release.yml` | Push de tag `v*` (ex.: `v1.2.0`) | Gera o APK com a versão da tag e cria uma **GitHub Release** com o APK anexado e release notes automáticas (use para soltar uma minor/major manualmente) |
 | `activation.yml` | Manual (aba Actions) | Gera o arquivo `.alf` para ativar a licença Unity no CI (usado uma única vez) |
 
 ### Configuração inicial (uma vez)
@@ -185,12 +185,16 @@ Para **licença Pro/Plus**, pule o workflow de ativação e configure `UNITY_SER
 
 ### Publicar uma versão
 
+**Automático:** todo deploy (push/merge) na `main` gera um novo release. O CI incrementa o patch da última tag `v*` (ex.: `v1.0.0` → `v1.0.1`), cria a tag e publica a GitHub Release com o APK (`BugaPlayer360-vX.Y.Z.apk`) e release notes automáticas.
+
+**Manual (minor/major):** para pular para uma versão específica, crie a tag manualmente:
+
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+git tag v1.2.0
+git push origin v1.2.0
 ```
 
-O workflow de release gera o APK (`BugaPlayer360-v1.0.0.apk`) e cria a release automaticamente.
+O workflow de release gera o APK (`BugaPlayer360-v1.2.0.apk`) e cria a release; os releases automáticos seguintes continuam a partir dessa tag.
 
 ### Testes
 
