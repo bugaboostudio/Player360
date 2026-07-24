@@ -12,7 +12,7 @@ Obrigado pelo interesse em contribuir! Este documento explica como preparar o am
 3. Abra a pasta do projeto no Unity Hub. Os pacotes (Meta XR SDK, XR Plugin Management, Input System etc.) são resolvidos automaticamente pelo Package Manager.
 4. A cena principal é `Assets/_Core/Scenes/360Play.unity`.
 
-Para detalhes de build e deploy no Meta Quest, veja o [README](README.md).
+Para detalhes de build e deploy no Meta Quest, veja a [Documentação Técnica](docs/DOCUMENTACAO-TECNICA.md).
 
 ## Rodando os testes
 
